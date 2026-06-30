@@ -241,15 +241,15 @@ void SSD1306_Hienthikitu(uint8_t x, uint8_t y, char c) {
         for (int row = 0; row < 8; row++) {
             uint16_t val = Font6x8[index * 8 + row];
   
-            if (val & (1 << (15 - col))) { //là cách đọc một pixel từ dữ liệu font bằng cách kiểm tra bit trong số 16-bit. Nó đảm bảo ta lấy đúng pixel theo cột hiện tại, từ bit cao xuống bit thấp.
-                buf[col] |= (1 << row); //ghi pixel sáng vào đúng vị trí trong cột dữ liệu
+            if (val & (1 << (15 - col))) { //la cach doc mot pixel tu du lieu font bang cach kiem tra bit trong so 16-bit. No đam bao ta lay đung pixel theo cot hien tai, tu bit cao xuong bit thap.
+                buf[col] |= (1 << row); //ghi pixel sang vao đung vi tri trong cot du lieu
             }
         }
     }
     SSD1306_Ghilenh(0xB0 + y); // chon page
-    SSD1306_Ghilenh(((x & 0xF0) >> 4) | 0x10); // cột cao (4 bit cao)
-    SSD1306_Ghilenh((x & 0x0F)); // cột thấp (4 bit thấp)
-    SSD1306_Ghidulieu(buf, 6); // ghi 6 cột dữ liệu ký tự
+    SSD1306_Ghilenh(((x & 0xF0) >> 4) | 0x10); // cot cao (4 bit cao)
+    SSD1306_Ghilenh((x & 0x0F)); // cột thap (4 bit thap)
+    SSD1306_Ghidulieu(buf, 6); // ghi 6 cot dữu lieu ky tu
 }
 
 void SSD1306_Ghi_chuoi(uint8_t x, uint8_t y, char *str) {
@@ -270,7 +270,7 @@ void SSD1306_Ghi_chuoi(uint8_t x, uint8_t y, char *str) {
 }
 void SHT30_StartMeasurement() 
 {
-    uint8_t cmd[2] = {0x2C, 0x06}; // High repeatability, clock stretching disabled đo chính xác cao,đo không dùng clock stretching (master không bị giữ SCL), Clock stretching là cách để slave “kéo dài” xung clock nhằm trì hoãn giao tiếp khi chưa sẵn sàng
+    uint8_t cmd[2] = {0x2C, 0x06}; //do chinh xac cao,do khong dung clock stretching (master khong bi giu SCL)
     HAL_I2C_Master_Transmit(&hi2c1, SHT30_ADDR, cmd, 2, 1000);
     HAL_Delay(20);
 }
@@ -345,13 +345,13 @@ void LORA_WriteReg(uint8_t addr, uint8_t value) {
 uint8_t LORA_ReadReg(uint8_t addr) {
     uint8_t buf[2];
     uint8_t rx[2];
-    buf[0] = addr & 0x7F; // bit7=0 => đọc
+    buf[0] = addr & 0x7F; // bit7=0 => doc
 
     HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,0);
     HAL_SPI_TransmitReceive(&hspi1, buf, rx, 2, 1000);
     HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,1);
 
-    return rx[1]; // byte dữ liệu
+    return rx[1]; // byte du lieu
 }
 void LORA_Init(void) {
 		HAL_Delay(1000);
@@ -393,21 +393,21 @@ void LORA_Send(uint8_t *data, uint8_t length) {
 		LORA_WriteReg(0x01, 0x81);// Che do standby
 		LORA_WriteReg(0x12, (1 << 3));// Xoa co TX done
 	
-    // Đặt lai địa chỉ FIFO TX
+    // Đat lai dia chi FIFO TX
     LORA_WriteReg(0x0E, 0x00);
     LORA_WriteReg(0x0D, 0x00);
 
-    // Ghi dữ liệu vào thanh ghi FIFO
+    // Ghi du lieu vào thanh ghi FIFO
     HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,0);
     uint8_t addr = 0x00 | 0x80;
     HAL_SPI_Transmit(&hspi1, &addr, 1, 1000);
     HAL_SPI_Transmit(&hspi1, data, length, 1000);
     HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,1);
 
-    // Đặt độ dài gói tin
+    // Đat đo dai goi tin
     LORA_WriteReg(0x22, length);
 
-    // Chuyển sang chế độ TX de truyen
+    // Chuyen sang che đo TX de truyen
     LORA_WriteReg(0x01, 0x83);
 
 		irqFlags=LORA_ReadReg(0x12);
